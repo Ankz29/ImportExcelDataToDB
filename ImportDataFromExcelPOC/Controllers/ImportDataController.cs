@@ -9,6 +9,7 @@ using System.Web;
 using ImportDataFromExcelPOC.Models;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 
 namespace ImportDataFromExcelPOC.Controllers
@@ -78,23 +79,31 @@ namespace ImportDataFromExcelPOC.Controllers
                                 foreach (DataRow row in dt.Rows)
                                 {
                                     var Description = row["SUBFDESC"].ToString().Trim();
-                                    ConvertToCamelCase(Description);
+                                    ConvertToPascalCase(Description);
 
                                     var Address = row["SUBFADR1"].ToString().Trim();
                                     var City = row["SUBFCITY"].ToString().Trim();
                                     var State = row["SUBFSTATE"].ToString().Trim();
                                     var ZipCode = row["SUBFZIP"].ToString().Trim();
                                     var PhoneNumber = row["PhoneNum"].ToString().Trim();
-                                    GetPhoneNumber(PhoneNumber);
+                                    var formattedPhoneNumber ="";
+                                    if (!string.IsNullOrEmpty(PhoneNumber))
+                                    {
+                                        formattedPhoneNumber = GetPhoneNumber(PhoneNumber);
+                                    }
 
                                     var PhoneNumber2 = row["PhoneNum2"].ToString().Trim();
-
+                                    var formattedPhoneNumber2 = "";
+                                    if (!string.IsNullOrEmpty(PhoneNumber2))
+                                    {
+                                        formattedPhoneNumber2 = GetPhoneNumber(PhoneNumber2);
+                                    }
                                     //conString = ConfigurationManager.ConnectionStrings["constr"].ConnectionString;
                                     //using (SqlConnection con = new SqlConnection(conString))
                                     //{
 
 
-                                    String query = "INSERT INTO dbo.PtacDealer_TB (Description,Address,City,State,ZipCode,PhoneNumber,PhoneNumber2) VALUES ('" + Description.Replace("'", "''") + "','" + Address.Replace("'", "''") + "','" + City.Replace("'", "''") + "','" + State + "','" + ZipCode + "','" + PhoneNumber + "','" + PhoneNumber2 + "')";
+                                    String query = "INSERT INTO dbo.PtacDealer_TB (Description,Address,City,State,ZipCode,PhoneNumber,PhoneNumber2) VALUES ('" + Description.Replace("'", "''") + "','" + Address.Replace("'", "''") + "','" + City.Replace("'", "''") + "','" + State + "','" + ZipCode + "','" + formattedPhoneNumber + "','" + formattedPhoneNumber2 + "')";
 
                                     SqlCommand command1 = new SqlCommand(query, con);
 
@@ -112,77 +121,47 @@ namespace ImportDataFromExcelPOC.Controllers
                 }
             }
             return View();
-
-
         }
 
-        public static string ConvertToCamelCase(string DealerName)
+        //method to convert DealerName to Pascal Case & format DealerName as per requirement//
+        public static string ConvertToPascalCase(string DealerName)
         {
+            string dealerNameLowerCase;
+          
+            // Make DealerName string all lowercase, because ToTitleCase does not change all uppercase correctly //
+            dealerNameLowerCase = DealerName.ToLower();
 
-            //var data = DealerName.ToUpperInvariant();
-            //TextInfo txtInfo = new CultureInfo("en-us", true).TextInfo;
-            //DealerName = txtInfo.ToTitleCase(DealerName);
+            // Creates a TextInfo based on the "en-US" culture//           
+           TextInfo myTextInfo = new CultureInfo("en-US", false).TextInfo;
+            dealerNameLowerCase = myTextInfo.ToTitleCase(dealerNameLowerCase);
+            
 
-
-           // var yourString = "WARD_VS_VITAL_SIGNS".ToLower().Replace("_", " ");
-            //TextInfo info = CultureInfo.CurrentCulture.TextInfo;
-            //DealerName = info.;
-            //Console.WriteLine(DealerName);
-            //return DealerName;
-
-            //string textToChange = "WARD_VS_VITAL_SIGNS";
-            System.Text.StringBuilder resultBuilder = new System.Text.StringBuilder();
-
-            //foreach (char c in DealerName)
+            String[] exceptionalCases = new string[8] { "PTAC", "SVC", "SVCS", "LLC", "INC", "A/C", "ACR", "CO" };
+            //if(dealerNameLowerCase.Contains(exceptionalCases[]))
             //{
-            //    // Replace anything, but letters and digits, with space
-            //    if (!Char.IsLetterOrDigit(c))
-            //    {
-            //        resultBuilder.Append(" ");
-            //    }
-            //    else
-            //    {
-            //        resultBuilder.Append(c);
-            //    }
+
             //}
 
-            string result = resultBuilder.ToString();
 
-            // Make result string all lowercase, because ToTitleCase does not change all uppercase correctly
-            result = result.ToLower();
-
-            // Creates a TextInfo based on the "en-US" culture.
-            TextInfo myTI = new CultureInfo("en-US", false).TextInfo;
-
-            result = myTI.ToTitleCase(result);
-            return result;
+            return dealerNameLowerCase;
         }
+
 
 
         public static string GetPhoneNumber(string  number)
         {
-            string data;
-            string n = number.ToString();
-            if (n.Length == 13)
+            string formattedNumber;
+            //string justDigits = new string(a.Where(number => char.IsDigit(number)).ToArray());    
+            if (number != "NULL")
             {
-                data =   n.Substring(0,4)+  n.Substring(4, 4) + n.Substring(5,13) ;
-                return data;
+                string result = Regex.Replace(number, @"^(\+)|\D", "$1");
+                 formattedNumber = "(" + result.Substring(0, 3) + ")" + " " + result.Substring(3, 3) + " " + "-" + " " + result.Substring(6, 4);
             }
-            else if (n.Length == 12)
+            else
             {
-                data = "(" + n.Substring(0,3) + ")" + " "+ n.Substring(4,4);
-                    //data = "(" + n.Substring(0, 2) + ") " + n.Substring(3, 6) + n.Substring(8, 11);
-                //  data = "(" + n.Substring(0, 3) + ") " + n.Substring(3, 3) + " - " + n.Substring(6, 4);
-                return data;
+                return number="";
             }
-            
-            else 
-            {
-                data = "(" + n.Substring(0, 3) + ")" + " " + n.Substring(4, 6) + " " + n.Substring(7, 10);
-                return data;
-            }
-                //data = number;
-                //return data;
+                return formattedNumber;
         }
 
     }

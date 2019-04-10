@@ -87,14 +87,14 @@ namespace ImportDataFromExcelPOC.Controllers
                                     var ZipCode = row["SUBFZIP"].ToString().Trim();
                                     var PhoneNumber = row["PhoneNum"].ToString().Trim();
                                     var formattedPhoneNumber ="";
-                                    if (!string.IsNullOrEmpty(PhoneNumber))
+                                    if (!string.IsNullOrEmpty(PhoneNumber) || PhoneNumber == "NULL")
                                     {
                                         formattedPhoneNumber = GetPhoneNumber(PhoneNumber);
                                     }
 
                                     var PhoneNumber2 = row["PhoneNum2"].ToString().Trim();
                                     var formattedPhoneNumber2 = "";
-                                    if (!string.IsNullOrEmpty(PhoneNumber2))
+                                    if (!string.IsNullOrEmpty(PhoneNumber2) || PhoneNumber2 == "NULL")
                                     {
                                         formattedPhoneNumber2 = GetPhoneNumber(PhoneNumber2);
                                     }

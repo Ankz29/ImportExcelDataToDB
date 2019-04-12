@@ -23,9 +23,10 @@ namespace ImportDataFromExcelPOC.Controllers
         public ActionResult Index()
         
         {
-            string filePath = "D:\\Practice\\PtacNewDealers.xlsx";
 
-            if (System.IO.File.Exists(filePath))
+            string filePath = "D:\\Practice\\PtacNewDealers.xlsx"; //move this to web.cofig
+
+            if (System.IO.File.Exists(filePath)) //dont use Full qualified namespaces//
             {
                 string extension = Path.GetExtension(filePath);
                 string conString = string.Empty;
@@ -38,6 +39,9 @@ namespace ImportDataFromExcelPOC.Controllers
                         conString = ConfigurationManager.ConnectionStrings["Excel07ConString"].ConnectionString;
                         break;
                 }
+
+               // DataTable dt = ExcelUtity.ReadData(filePath);
+
 
 
                 DataTable dt = new DataTable();
@@ -135,15 +139,13 @@ namespace ImportDataFromExcelPOC.Controllers
            TextInfo myTextInfo = new CultureInfo("en-US", false).TextInfo;
             dealerNameLowerCase = myTextInfo.ToTitleCase(dealerNameLowerCase);
             
-
+            string data;
             String[] exceptionalCases = new string[8] { "PTAC", "SVC", "SVCS", "LLC", "INC", "A/C", "ACR", "CO" };
-            //if(dealerNameLowerCase.Contains(exceptionalCases[]))
-            //{
 
-            //}
+            string resultant = dealerNameLowerCase.Substring(8, 4);
+            string UpperCase = resultant.ToUpper();
 
-
-            return dealerNameLowerCase;
+                return dealerNameLowerCase;
         }
 
 
@@ -155,7 +157,7 @@ namespace ImportDataFromExcelPOC.Controllers
             if (number != "NULL")
             {
                 string result = Regex.Replace(number, @"^(\+)|\D", "$1");
-                 formattedNumber = "(" + result.Substring(0, 3) + ")" + " " + result.Substring(3, 3) + " " + "-" + " " + result.Substring(6, 4);
+                formattedNumber = "(" + result.Substring(0, 3) + ")" + " " + result.Substring(3, 3) + " " + "-" + " " + result.Substring(6, 4);
             }
             else
             {
